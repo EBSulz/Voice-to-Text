@@ -49,7 +49,7 @@ The transcription language can be changed. It is the `language` argument of `mod
 - Dutch: `nl`
 - Portuguese: `pt`
 
-The script is currently set to Portuguese (`en`). Change that value, then run the script again.
+The script is currently set to English (`en`). Change that value, then run the script again.
 
 ## Run
 

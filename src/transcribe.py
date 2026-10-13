@@ -28,7 +28,10 @@ if not FILE_NAME_PATTERN.fullmatch(save_string):
         f"Invalid file name: {save_string}. Use only letters, digits, '-' or '_', "
         f"followed by one of: {', '.join('.' + ext for ext in ALLOWERD_EXTENSIONS)}"
         )
-result = model.transcribe("data/MeetingAudio.mp4", fp16=False, language="en")
+audio_path = os.path.join("data", save_string)
+if not os.path.isfile(audio_path):
+    raise SystemExit(f"File not found: {audio_path}")
+result = model.transcribe(audio_path, fp16=False, language="en")
 
 print(result["text"])
 

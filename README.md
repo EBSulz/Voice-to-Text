@@ -8,6 +8,7 @@ The script is `src/transcribe.py`. It reads a recording from `data/` and writes 
 
 - Python 3.12
 - [ffmpeg](https://ffmpeg.org/) installed and available on your `PATH`. See below.
+- OBS properly configured on your machine.
 
 ## ffmpeg
 
@@ -140,7 +141,20 @@ To use another transcription, name that file in the same message instead of `out
 
 ## How it works
 
+### Recording
+
+`make record` runs `src/obs_control.py`. That script reads OBS’s WebSocket port and password from OBS’s own settings file. If OBS is closed, it opens the app and tells it to start recording. It then connects to the WebSocket server, checks whether a recording is already in progress, and starts one if it is not. OBS writes the file into the Recording Path, which should be this project’s `data` folder, using the filename pattern from OBS.
+
+`make finish` uses the same connection. If OBS is closed, it does nothing else. If a recording is in progress, it stops that recording and waits for OBS to finish the file. It then quits OBS and waits until the app has closed.
+
+### Transcription
+
+`make transcribe` looks in `data/` for the newest `.mp4`, `.mp3`, `.wav`, `.m4a`, or `.mov` file and passes that name to `src/transcribe.py`. `make all` runs `finish` first, then `transcribe`, so the file just recorded is the one that gets transcribed.
+
+The script then does this:
+
 1. It points Python’s HTTPS checks at the certificate bundle from `certifi`, so the model download can verify its connection.
 2. It loads the Whisper `turbo` model.
-3. It transcribes the file in `data/` whose name you entered, with `fp16=False`, which is the setting to use on a machine without a supported GPU.
-4. It writes a Markdown file in `output/`, next to the project root rather than next to the script. The file name is the recording name without its extension.
+3. It asks for a file name, including the extension. The name may contain only letters, digits, `-`, and `_`, and it must end in `.mp4`, `.mp3`, `.wav`, `.m4a`, or `.mov`.
+4. It transcribes `data/<that name>` with `fp16=False`, which is the setting to use on a machine without a supported GPU. The spoken language is the `language` argument, currently `en`.
+5. It prints the text, then writes `output/<name>.md` next to the project root rather than next to the script. The Markdown file starts with a `# Transcription` heading, and `<name>` is the recording name without its extension.
